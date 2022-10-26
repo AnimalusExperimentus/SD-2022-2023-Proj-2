@@ -168,6 +168,17 @@ int rtree_size(struct rtree_t *rtree){
  */
 int rtree_height(struct rtree_t *rtree){
 
+  struct message_t *msg = create_message(MESSAGE_T__OPCODE__OP_HEIGHT,MESSAGE_T__C_TYPE__CT_NONE);
+  //struct _MessageT msg = MESSAGE_T__INIT;
+  if ((msg = network_send_receive(rtree,msg))==NULL) {
+    return -1;
+  }
+
+  if (any_error(msg->ms->opcode,MESSAGE_T__OPCODE__OP_DEL) != 0) {
+    return -1;
+  }
+
+  return msg->ms->data_size; // nao eh data size VERIFICAR
 
 
 }
@@ -196,7 +207,9 @@ char **rtree_get_keys(struct rtree_t *rtree){
 /* Devolve um array de void* com a cópia de todas os values da árvore,
  * colocando um último elemento a NULL.
  */
-void **rtree_get_values(struct rtree_t *rtree);
+void **rtree_get_values(struct rtree_t *rtree){
+
+}
 
 
 
