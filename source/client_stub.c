@@ -1,3 +1,10 @@
+/*
+*   Grupo 12
+*   Duarte Lopes Pinheiro nº54475
+*   Filipe Henriques nº55228
+*   Márcio Moreira nº41972
+*/
+
 #include "../include/data.h"
 #include "../include/entry.h"
 #include "../include/client_stub_private.h"
@@ -6,6 +13,10 @@
 #include <stdio.h>
 #include "string.h"
 
+#include "network_client.h"
+#include "client_stub.h"
+#include "entry.h"
+#include "data.h"
 
 
 /* Remote tree. A definir pelo grupo em client_stub-private.h
@@ -63,7 +74,7 @@ struct rtree_t *rtree_connect(const char *address_port){
  * Retorna 0 se tudo correr bem e -1 em caso de erro.
  */
 int rtree_disconnect(struct rtree_t *rtree){
-        if (rtree == NULL) {
+    if (rtree == NULL) {
         return -1;
     }
     if (network_close(rtree) == -1) {
@@ -72,6 +83,8 @@ int rtree_disconnect(struct rtree_t *rtree){
     free(rtree);
     return 0;
 }
+
+
 //---------------------------------------------------------------------------------------------------
 /* Função para adicionar um elemento na árvore.
  * Se a key já existe, vai substituir essa entrada pelos novos dados.
@@ -184,3 +197,35 @@ char **rtree_get_keys(struct rtree_t *rtree){
  * colocando um último elemento a NULL.
  */
 void **rtree_get_values(struct rtree_t *rtree);
+
+
+
+
+/*
+ *Função auxiliar
+ */
+struct message_t *create_message(short op,short c_tp){
+  struct _MessageT *ms;
+  //message_t__init(&ms);
+  //struct MESSAGE_T *mess = malloc(sizeof(struct MESSAGE_T));
+
+  ms->opcode = op;
+  ms->c_type = c_tp;
+  struct message_t *msg = malloc(sizeof(ms));
+  msg->ms = ms;
+  //msg.messg.opcode = op;
+  //msg.messg.c_type = c_tp;
+
+  return msg;
+}
+
+/*
+ *Função auxiliar
+ */
+int any_error(short op_f,short op_i){
+
+  if (op_f == MESSAGE_T__OPCODE__OP_ERROR) {
+    return -1;
+  }
+  return 0;
+}

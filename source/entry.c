@@ -20,14 +20,16 @@ struct entry_t *entry_create(char *key, struct data_t *data){
     struct entry_t *entry;
     entry=malloc(sizeof(struct entry_t));
 
-if(key==NULL&&data==NULL){
-    free(entry);
-    return NULL;
-}
-entry->key=malloc(strlen(key)+1);
-entry->key=key;
-entry->value=data;
-return entry;
+    if(key==NULL&&data==NULL){
+        free(entry);
+        return NULL;
+    }
+
+    entry->key=malloc(strlen(key)+1);
+    entry->key=key;
+    entry->value=data;
+    
+    return entry;
 }
 
 /* Função que elimina uma entry, libertando a memória por ela ocupada
@@ -39,8 +41,8 @@ void entry_destroy(struct entry_t *entry){
     free(entry->key);
     free(entry);
     }
-    
-    
+
+
 
 }
 
@@ -81,14 +83,16 @@ void entry_replace(struct entry_t *entry, char *new_key, struct data_t *new_valu
 *  A função devolve 0 se forem iguais, -1 se entry1<entry2, e 1 caso contrário.
 */
 int entry_compare(struct entry_t *entry1, struct entry_t *entry2){
-int val;
-if(entry1->key==entry2->key){
-    val=0;
 
-}else if(entry1->key<entry2->key){
-    val=-1;
-}else{
-    val=1;
-}
-return val;
+  int val;
+
+  if(entry1->key==entry2->key){
+      val=0;
+
+  }else if(entry1->key<entry2->key){
+      val=-1;
+  }else{
+      val=1;
+  }
+  return val;
 }
