@@ -10,11 +10,11 @@
 
 /* Remote tree. A definir pelo grupo em client_stub-private.h
  */
-struct rtree_t;
+//sstruct rtree_t;
 
 
 
-/* Função para estabelecer uma associação entre o cliente e o servidor, 
+/* Função para estabelecer uma associação entre o cliente e o servidor,
  * em que address_port é uma string no formato <hostname>:<port>.
  * Retorna NULL em caso de erro.
  */
@@ -58,7 +58,7 @@ struct rtree_t *rtree_connect(const char *address_port){
 
 }
 
-/* Termina a associação entre o cliente e o servidor, fechando a 
+/* Termina a associação entre o cliente e o servidor, fechando a
  * ligação com o servidor e libertando toda a memória local.
  * Retorna 0 se tudo correr bem e -1 em caso de erro.
  */
@@ -72,42 +72,115 @@ int rtree_disconnect(struct rtree_t *rtree){
     free(rtree);
     return 0;
 }
-
+//---------------------------------------------------------------------------------------------------
 /* Função para adicionar um elemento na árvore.
  * Se a key já existe, vai substituir essa entrada pelos novos dados.
  * Devolve 0 (ok, em adição/substituição) ou -1 (problemas).
  */
 int rtree_put(struct rtree_t *rtree, struct entry_t *entry){
 
-    
+  struct message_t *msg; //create_message(MESSAGE_T__OPCODE__OP_PUT,MESSAGE_T__C_TYPE__CT_ENTRY);
+  //struct _MessageT messg = MESSAGE_T__INIT;
+  msg->ms->key = entry->key;
+  msg->ms->data = entry->value;
+  if ((msg = network_send_receive(rtree,msg))==NULL) {
+    return -1;
+  }
+
+  return any_error(msg->ms->opcode,MESSAGE_T__OPCODE__OP_PUT);
+
 }
 
 /* Função para obter um elemento da árvore.
  * Em caso de erro, devolve NULL.
  */
-struct data_t *rtree_get(struct rtree_t *rtree, char *key);
+struct data_t *rtree_get(struct rtree_t *rtree, char *key){
 
-/* Função para remover um elemento da árvore. Vai libertar 
+  struct message_t *msg = create_message(MESSAGE_T__OPCODE__OP_GET,MESSAGE_T__C_TYPE__CT_KEY);
+  //struct _MessageT msg = MESSAGE_T__INIT;
+  msg->ms->key = key;
+  msg->ms->data_size = strlen(key);
+
+  if ((msg = network_send_receive(rtree,msg))==NULL) {
+    return NULL;
+  }
+
+  if (any_error(msg->ms->opcode,MESSAGE_T__OPCODE__OP_GET) != 0) {
+    return NULL;
+  }
+
+  struct data_t *d = malloc(msg->ms->data_size);
+  d = data_create2(msg->ms->data_size,msg->ms->key);
+
+  return d;
+}
+
+/* Função para remover um elemento da árvore. Vai libertar
  * toda a memoria alocada na respetiva operação rtree_put().
  * Devolve: 0 (ok), -1 (key not found ou problemas).
  */
-int rtree_del(struct rtree_t *rtree, char *key);
+int rtree_del(struct rtree_t *rtree, char *key){
+
+  struct message_t *msg = create_message(MESSAGE_T__OPCODE__OP_DEL,MESSAGE_T__C_TYPE__CT_KEY);
+  //struct _MessageT msg = MESSAGE_T__INIT;
+  msg->ms->data = key;
+  msg->ms->data_size = strlen(key);
+
+  if ((msg = network_send_receive(rtree,msg))==NULL) {
+    return -1;
+  }
+
+  return any_error(msg->ms->opcode,MESSAGE_T__OPCODE__OP_DEL);
+}
 
 /* Devolve o número de elementos contidos na árvore.
  */
-int rtree_size(struct rtree_t *rtree);
+int rtree_size(struct rtree_t *rtree){
+
+  struct message_t *msg = create_message(MESSAGE_T__OPCODE__OP_SIZE,MESSAGE_T__C_TYPE__CT_NONE);
+  //struct _MessageT msg = MESSAGE_T__INIT;
+  if ((msg = network_send_receive(rtree,msg))==NULL) {
+    return -1;
+  }
+
+  if (any_error(msg->ms->opcode,MESSAGE_T__OPCODE__OP_DEL) != 0) {
+    return -1;
+  }
+
+  return msg->ms->data_size;
+
+}
 
 /* Função que devolve a altura da árvore.
  */
-int rtree_height(struct rtree_t *rtree);
+int rtree_height(struct rtree_t *rtree){
+
+
+
+}
 
 /* Devolve um array de char* com a cópia de todas as keys da árvore,
  * colocando um último elemento a NULL.
  */
-char **rtree_get_keys(struct rtree_t *rtree);
+char **rtree_get_keys(struct rtree_t *rtree){
+
+  struct message_t *msg = create_message(MESSAGE_T__OPCODE__OP_GETKEYS,MESSAGE_T__C_TYPE__CT_NONE);
+  //struct _MessageT msg = MESSAGE_T__INIT;
+
+  if ((msg = network_send_receive(rtree,msg))==NULL) {
+    return NULL;
+  }
+
+  if (any_error(msg->ms->opcode,MESSAGE_T__OPCODE__OP_DEL) != 0) {
+    return NULL;
+  }
+
+  return msg->ms->keys;
+
+
+}
 
 /* Devolve um array de void* com a cópia de todas os values da árvore,
  * colocando um último elemento a NULL.
  */
 void **rtree_get_values(struct rtree_t *rtree);
-
