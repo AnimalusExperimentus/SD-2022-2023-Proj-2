@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "tree_skel.h": "c",
+        "string.h": "c",
+        "data.h": "c",
+        "client_stub_private.h": "c"
+    }
+}

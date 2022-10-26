@@ -25,7 +25,12 @@ message message_t
                 CT_NONE   	= 70;
         }
         C_type c_type = 2;
+        string key = 3;
 
-        bytes data = 3;
+        int32 size=4;
+        bytes data = 5;
+        repeated string keys = 6;
+        
+
 
 };
