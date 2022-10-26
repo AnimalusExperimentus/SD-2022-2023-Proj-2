@@ -94,13 +94,13 @@ int rtree_put(struct rtree_t *rtree, struct entry_t *entry){
 
   struct message_t *msg; //create_message(MESSAGE_T__OPCODE__OP_PUT,MESSAGE_T__C_TYPE__CT_ENTRY);
   //struct _MessageT messg = MESSAGE_T__INIT;
-  msg->ms->key = entry->key;
-  msg->ms->data = entry->value;
+  msg->key = entry->key;
+  msg->data = entry->value;
   if ((msg = network_send_receive(rtree,msg))==NULL) {
     return -1;
   }
 
-  return any_error(msg->ms->opcode,MESSAGE_T__OPCODE__OP_PUT);
+  return any_error(msg->opcode,MESSAGE_T__OPCODE__OP_PUT);
 
 }
 
@@ -111,19 +111,19 @@ struct data_t *rtree_get(struct rtree_t *rtree, char *key){
 
   struct message_t *msg = create_message(MESSAGE_T__OPCODE__OP_GET,MESSAGE_T__C_TYPE__CT_KEY);
   //struct _MessageT msg = MESSAGE_T__INIT;
-  msg->ms->key = key;
-  msg->ms->data_size = strlen(key);
+  msg->key = key;
+  msg->size = strlen(key);
 
   if ((msg = network_send_receive(rtree,msg))==NULL) {
     return NULL;
   }
 
-  if (any_error(msg->ms->opcode,MESSAGE_T__OPCODE__OP_GET) != 0) {
+  if (any_error(msg->opcode,MESSAGE_T__OPCODE__OP_GET) != 0) {
     return NULL;
   }
 
-  struct data_t *d = malloc(msg->ms->data_size);
-  d = data_create2(msg->ms->data_size,msg->ms->key);
+  struct data_t *d = malloc(msg->size);
+  d = data_create2(msg->size,msg->key);
 
   return d;
 }
@@ -136,14 +136,14 @@ int rtree_del(struct rtree_t *rtree, char *key){
 
   struct message_t *msg = create_message(MESSAGE_T__OPCODE__OP_DEL,MESSAGE_T__C_TYPE__CT_KEY);
   //struct _MessageT msg = MESSAGE_T__INIT;
-  msg->ms->data = key;
-  msg->ms->data_size = strlen(key);
+  msg->data = key;
+  msg->size = strlen(key);
 
   if ((msg = network_send_receive(rtree,msg))==NULL) {
     return -1;
   }
 
-  return any_error(msg->ms->opcode,MESSAGE_T__OPCODE__OP_DEL);
+  return any_error(msg->opcode,MESSAGE_T__OPCODE__OP_DEL);
 }
 
 /* Devolve o número de elementos contidos na árvore.
@@ -156,11 +156,11 @@ int rtree_size(struct rtree_t *rtree){
     return -1;
   }
 
-  if (any_error(msg->ms->opcode,MESSAGE_T__OPCODE__OP_DEL) != 0) {
+  if (any_error(msg->opcode,MESSAGE_T__OPCODE__OP_DEL) != 0) {
     return -1;
   }
 
-  return msg->ms->data_size;
+  return msg->size;
 
 }
 
@@ -174,11 +174,11 @@ int rtree_height(struct rtree_t *rtree){
     return -1;
   }
 
-  if (any_error(msg->ms->opcode,MESSAGE_T__OPCODE__OP_DEL) != 0) {
+  if (any_error(msg->opcode,MESSAGE_T__OPCODE__OP_DEL) != 0) {
     return -1;
   }
 
-  return msg->ms->data_size; // nao eh data size VERIFICAR
+  return msg->size; // nao eh data size VERIFICAR
 
 
 }
@@ -195,11 +195,11 @@ char **rtree_get_keys(struct rtree_t *rtree){
     return NULL;
   }
 
-  if (any_error(msg->ms->opcode,MESSAGE_T__OPCODE__OP_DEL) != 0) {
+  if (any_error(msg->opcode,MESSAGE_T__OPCODE__OP_DEL) != 0) {
     return NULL;
   }
 
-  return msg->ms->keys;
+  return msg->keys;
 
 
 }
@@ -237,7 +237,7 @@ struct message_t *create_message(short op,short c_tp){
  */
 int any_error(short op_f,short op_i){
 
-  if (op_f == MESSAGE_T__OPCODE__OP_ERROR) {
+  if (op_f == MESSAGE_T__C_TYPE__CT_NONE) {
     return -1;
   }
   return 0;
