@@ -45,7 +45,7 @@ int network_connect(struct rtree_t *rtree){
  * - De-serializar a mensagem de resposta;
  * - Retornar a mensagem de-serializada ou NULL em caso de erro.
  */
-message_t *network_send_receive(struct rtree_t * rtree, message_t *msg){
+message_t *network_send_receive(struct rtree_t * rtree, message_t *msg) {
 
     if (rtree == NULL || msg == NULL) {
         perror("Client socket or message tried to send is invalid");

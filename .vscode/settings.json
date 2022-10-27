@@ -4,6 +4,7 @@
         "string.h": "c",
         "data.h": "c",
         "client_stub_private.h": "c",
-        "cstdio": "c"
+        "cstdio": "c",
+        "sdmessage.pb-c.h": "c"
     }
 }
