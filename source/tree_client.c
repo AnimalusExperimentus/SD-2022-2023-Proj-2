@@ -42,6 +42,9 @@ int main(int argc, char *argv[]) {
             }
             // printf("%s %s\n",key, data);
             //TODO
+            else {
+              printf("Error on put\n");
+            }
 
         } else if (strcmp(command, "get") == 0) {
             char* key = strtok(NULL, " ");
@@ -51,6 +54,9 @@ int main(int argc, char *argv[]) {
             }
             // printf("%s\n",key);
             //TODO
+            else {
+              printf("Error on get\n");
+            }
 
         } else if (strcmp(command, "del") == 0) {
             char* key = strtok(NULL, " ");
@@ -60,6 +66,9 @@ int main(int argc, char *argv[]) {
             }
             // printf("%s\n",key);
             //TODO
+            else {
+              printf("Error on del\n");
+            }
 
         } else if (strcmp(command, "size") == 0) {
             char* key = strtok(NULL, " ");
@@ -69,6 +78,9 @@ int main(int argc, char *argv[]) {
             }
             // printf("%s\n",key);
             //TODO
+            else {
+              printf("Error on size\n");
+            }
         } else if (strcmp(command, "height") == 0) {
             char* key = strtok(NULL, " ");
             if (key == NULL || strtok(NULL, " ") != NULL){
@@ -77,6 +89,9 @@ int main(int argc, char *argv[]) {
             }
             // printf("%s\n",key);
             //TODO
+            else {
+              printf("Error on height\n");
+            }
         } else if (strcmp(command, "getkeys") == 0) {
             char* key = strtok(NULL, " ");
             if (key == NULL || strtok(NULL, " ") != NULL){
@@ -85,6 +100,9 @@ int main(int argc, char *argv[]) {
             }
             // printf("%s\n",key);
             //TODO
+            else {
+              printf("Error on getkeys\n");
+            }
         } else if (strcmp(command, "getvalues") == 0) {
             char* key = strtok(NULL, " ");
             if (key == NULL || strtok(NULL, " ") != NULL){
@@ -93,6 +111,9 @@ int main(int argc, char *argv[]) {
             }
             // printf("%s\n",key);
             //TODO
+            else {
+              printf("Error on getvalues\n");
+            }
         } else {
             printf("That command doesn't exist.\n");
         }
