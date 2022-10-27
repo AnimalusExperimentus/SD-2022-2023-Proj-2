@@ -8,7 +8,7 @@
 #define SIZE_CLIENT_DEFAULT 1024
 int listen_number;
 
-
+typedef MessageT message_t;
 
 /* Função para preparar uma socket de receção de pedidos de ligação
  * num determinado porto.
@@ -54,57 +54,15 @@ int network_server_init(short port){
 
      free(server);
     return socket_fd;
-
 }
 
-/* Esta função deve:
- * - Aceitar uma conexão de um cliente;
- * - Receber uma mensagem usando a função network_receive;
- * - Entregar a mensagem de-serializada ao skeleton para ser processada;
- * - Esperar a resposta do skeleton;
- * - Enviar a resposta ao cliente usando a função network_send.
- */
-int network_main_loop(int listening_socket){
-    struct sockaddr_in client;
-    int client_socket;
-    socklen_t size_client = SIZE_CLIENT_DEFAULT;
-
-    if (listening_socket < 0) {
-        perror("Listening socket is invalid");
-        return -1;
-    }
-
-    listen_number=listening_socket;
-
-    while(true){
-        if((client_socket=accept(listening_socket,  &client,    size_client))!=-1){
-
-            MessageT *messageT = network_receive(client_socket);
-
-        if (messageT == NULL || messageT->opcode == MESSAGE_T__OPCODE__OP_BAD ||
-                messageT->c_type == MESSAGE_T__C_TYPE__CT_BAD) {
-                continue;
-                }else{
-                    invoke(messageT);
-                    network_send(client_socket,messageT);
-
-
-                }
-    close(client_socket);
-
-
-        }
-
-    }
-    return 0;
-}
 
 /* Esta função deve:
  * - Ler os bytes da rede, a partir do client_socket indicado;
  * - De-serializar estes bytes e construir a mensagem com o pedido,
  *   reservando a memória necessária para a estrutura message_t.
  */
-struct message_t *network_receive(int client_socket){
+message_t *network_receive(int client_socket) {
     if(client_socket<0){
         perror("Invalid Socket");
         return NULL;
@@ -135,15 +93,15 @@ struct message_t *network_receive(int client_socket){
     free(buffer_reader);
 
     return messageT_deserialized;
-
 }
+
 
 /* Esta função deve:
  * - Serializar a mensagem de resposta contida em msg;
  * - Libertar a memória ocupada por esta mensagem;
  * - Enviar a mensagem serializada, através do client_socket.
  */
-int network_send(int client_socket, MessageT *msg){
+int network_send(int client_socket, MessageT *msg) {
      if (client_socket < 0 || msg == NULL) {
         perror("Client socket or message tried to send is invalid");
         return -1;
@@ -168,6 +126,7 @@ int network_send(int client_socket, MessageT *msg){
     return 0;
 }
 
+
 /* A função network_server_close() liberta os recursos alocados por
  * network_server_init().
  */
@@ -176,4 +135,43 @@ int network_server_close() {
         return 0;
     }
     return -1;
+}
+
+
+/* Esta função deve:
+ * - Aceitar uma conexão de um cliente;
+ * - Receber uma mensagem usando a função network_receive;
+ * - Entregar a mensagem de-serializada ao skeleton para ser processada;
+ * - Esperar a resposta do skeleton;
+ * - Enviar a resposta ao cliente usando a função network_send.
+ */
+int network_main_loop(int listening_socket) {
+    struct sockaddr client;
+    int client_socket;
+    socklen_t size_client = SIZE_CLIENT_DEFAULT;
+
+    if (listening_socket < 0) {
+        perror("Listening socket is invalid");
+        return -1;
     }
+
+    listen_number=listening_socket;
+
+    while(true)
+    {
+        if((client_socket=accept(listening_socket, &client, &size_client))!=-1) {
+            
+            message_t *messageT = network_receive(client_socket);
+            
+            if (messageT == NULL || messageT->opcode == MESSAGE_T__OPCODE__OP_BAD ||
+                messageT->c_type == MESSAGE_T__C_TYPE__CT_BAD) {
+                continue;
+            } else {
+                invoke(messageT);
+                network_send(client_socket,messageT);
+            }
+            close(client_socket);
+        }
+    }
+    return 0;
+}

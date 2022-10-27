@@ -10,8 +10,6 @@
 struct tree_t *tree;
 
 
-
-
 /* Inicia o skeleton da árvore.
  * O main() do servidor deve chamar esta função antes de poder usar a
  * função invoke(). 
@@ -41,8 +39,7 @@ void tree_skel_destroy(){
 int invoke(MessageT *msg){
     
 
-
-    if(msg==NULL||msg->opcode < 0 || msg->c_type < 0 || msg->opcode > MESSAGE_T__OPCODE__OP_ERROR ||msg->opcode>MESSAGE_T__C_TYPE__CT_NONE){
+    if(msg==NULL || msg->opcode < 0 || msg->c_type < 0 || msg->opcode > MESSAGE_T__OPCODE__OP_ERROR || msg->c_type > MESSAGE_T__C_TYPE__CT_NONE) {
         return -1;
     }
     int i;
@@ -69,65 +66,71 @@ int invoke(MessageT *msg){
             msg->c_type=MESSAGE_T__C_TYPE__CT_NONE;
             return 0;
 
-
         case MESSAGE_T__OPCODE__OP_GET:
-            char* key =malloc(sizeof(msg->key));
+            char* key = malloc(sizeof(msg->key));
             strcpy(key,msg->key);
             struct data_t *t = tree_get(tree,key);
 
             ProtobufCBinaryData d ;
-            d.len=t->datasize;
-            d.data=malloc(t->datasize);
+            d.len = t->datasize;
+            d.data = malloc(t->datasize);
 
 
 
-            if(t==NULL){
-            msg->opcode=MESSAGE_T__OPCODE__OP_ERROR;
-            msg->c_type=MESSAGE_T__C_TYPE__CT_NONE;
+            if(t == NULL){
+                msg->opcode=MESSAGE_T__OPCODE__OP_ERROR;
+                msg->c_type=MESSAGE_T__C_TYPE__CT_NONE;
             }else{
-            msg->opcode=MESSAGE_T__OPCODE__OP_GET+1;
-            msg->c_type=MESSAGE_T__C_TYPE__CT_VALUE;
-            memcpy(d.data,t->data,t->datasize);
-            msg->data=d;
+                msg->opcode=MESSAGE_T__OPCODE__OP_GET+1;
+                msg->c_type=MESSAGE_T__C_TYPE__CT_VALUE;
+                memcpy(d.data,t->data,t->datasize);
+                msg->data=d;
             }
             return 0;
-
-
-
 
         case MESSAGE_T__OPCODE__OP_PUT:
 
-            struct data_t *t=data_create((int)msg->size);
+            struct data_t *nt = data_create((int)msg->size);
 
-            memcpy(t->data,msg->data.data,t->datasize);
+            memcpy(nt->data, msg->data.data, nt->datasize);
 
-            i=tree_put(tree,msg->key,t);//put copia coisas de dara para guardar do outro lado
+            //put copia coisas de daria para guardar do outro lado
+            int i=tree_put(tree, msg->key, nt);
 
-            if(i==0){
-            msg->opcode=MESSAGE_T__OPCODE__OP_PUT+1;
+            if(i == 0){
+                msg->opcode=MESSAGE_T__OPCODE__OP_PUT+1;
             }else{
-            msg->opcode=MESSAGE_T__OPCODE__OP_ERROR;
+                msg->opcode=MESSAGE_T__OPCODE__OP_ERROR;
             }
-
-             msg->c_type=MESSAGE_T__C_TYPE__CT_NONE;
-             
+            msg->c_type=MESSAGE_T__C_TYPE__CT_NONE;
             return 0;
 
-
         case MESSAGE_T__OPCODE__OP_GETKEYS:
-            char **t=tree_get_keys(tree);
+            char** kk = tree_get_keys(tree);
             msg->opcode=MESSAGE_T__OPCODE__OP_GETKEYS+1;
             msg->c_type=MESSAGE_T__C_TYPE__CT_KEYS;
             msg->n_keys=tree_size(tree);
-            msg->keys=t;
+            msg->keys=kk;
             return 0;
 
         case MESSAGE_T__OPCODE__OP_GETVALUES:
-            struct data_t *d=tree_get_values(tree);
+            void **val = tree_get_values(tree);
             msg->opcode=MESSAGE_T__OPCODE__OP_GETVALUES;
             msg->c_type=MESSAGE_T__C_TYPE__CT_VALUES;
-            msg->size=sizeof(d);
-            msg->data=d;
+            msg->size=sizeof(val);
+            // msg->data=?;
+            return 0;
+
+        case MESSAGE_T__OPCODE__OP_BAD:
+            // TODO
+            return 0;
+
+        case MESSAGE_T__OPCODE__OP_ERROR:
+            // TODO
+            return 0;
+
+        case _MESSAGE_T__OPCODE_IS_INT_SIZE:
+            // TODO
             return 0;
     }
     

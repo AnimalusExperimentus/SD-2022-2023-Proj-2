@@ -1,9 +1,11 @@
 #include "../include/client_stub.h"
 #include "../include/sdmessage.pb-c.h"
+#include "../include/client_stub_private.h"
+#include "../include/network-private.h"
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <unistd.h>
-#include "../include/client_stub_private.h"
 
 typedef MessageT message_t;
 
@@ -31,11 +33,9 @@ int network_connect(struct rtree_t *rtree){
         close(rtree->sockfd);
         return -1;
     }
-
-
     return 0;
-
 }
+
 
 /* Esta função deve:
  * - Obter o descritor da ligação (socket) da estrutura rtree_t;
@@ -45,13 +45,13 @@ int network_connect(struct rtree_t *rtree){
  * - De-serializar a mensagem de resposta;
  * - Retornar a mensagem de-serializada ou NULL em caso de erro.
  */
-struct message_t *network_send_receive(struct rtree_t * rtree,struct message_t *msg){
+message_t *network_send_receive(struct rtree_t * rtree, message_t *msg){
 
     if (rtree == NULL || msg == NULL) {
         perror("Client socket or message tried to send is invalid");
         return NULL;
     }
-
+    
     unsigned buffer_size_host = message_t__get_packed_size(msg);
     unsigned buffer_size = htonl(buffer_size_host);
 
@@ -68,7 +68,6 @@ struct message_t *network_send_receive(struct rtree_t * rtree,struct message_t *
     }
 
     free(buffer_write);
-
 
     unsigned buffer_size_client;
 
@@ -94,12 +93,7 @@ struct message_t *network_send_receive(struct rtree_t * rtree,struct message_t *
     // Finally, free all memory allocated
     free(buffer_reader);
     return messageT_deserialized;
-
-    }
-
-
-
-
+}
                                        
 
 /* A função network_close() fecha a ligação estabelecida por

@@ -3,6 +3,7 @@
         "tree_skel.h": "c",
         "string.h": "c",
         "data.h": "c",
-        "client_stub_private.h": "c"
+        "client_stub_private.h": "c",
+        "cstdio": "c"
     }
 }

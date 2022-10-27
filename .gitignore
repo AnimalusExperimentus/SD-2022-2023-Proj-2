@@ -1,2 +1,3 @@
-object/
-binary/
+.vscode/
+.vscode/settings.json
+.vscode/*
