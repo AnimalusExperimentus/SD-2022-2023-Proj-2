@@ -62,12 +62,36 @@ int main(int argc, char *argv[]) {
             //TODO
 
         } else if (strcmp(command, "size") == 0) {
+            char* key = strtok(NULL, " ");
+            if (key == NULL || strtok(NULL, " ") != NULL){
+                printf("syntax: size <key>\n");
+                continue;
+            }
+            // printf("%s\n",key);
             //TODO
         } else if (strcmp(command, "height") == 0) {
+            char* key = strtok(NULL, " ");
+            if (key == NULL || strtok(NULL, " ") != NULL){
+                printf("syntax: height <key>\n");
+                continue;
+            }
+            // printf("%s\n",key);
             //TODO
         } else if (strcmp(command, "getkeys") == 0) {
+            char* key = strtok(NULL, " ");
+            if (key == NULL || strtok(NULL, " ") != NULL){
+                printf("syntax: getkeys <key>\n");
+                continue;
+            }
+            // printf("%s\n",key);
             //TODO
         } else if (strcmp(command, "getvalues") == 0) {
+            char* key = strtok(NULL, " ");
+            if (key == NULL || strtok(NULL, " ") != NULL){
+                printf("syntax: getvalues <key>\n");
+                continue;
+            }
+            // printf("%s\n",key);
             //TODO
         } else {
             printf("That command doesn't exist.\n");
