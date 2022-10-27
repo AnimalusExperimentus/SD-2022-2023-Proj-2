@@ -4,6 +4,8 @@
 #include "sdmessage.pb-c.h"
 #include "tree.h"
 
+typedef MessageT message_t;
+
 /* Inicia o skeleton da árvore.
  * O main() do servidor deve chamar esta função antes de poder usar a
  * função invoke(). 
@@ -19,6 +21,6 @@ void tree_skel_destroy();
  * e utiliza a mesma estrutura message_t para devolver o resultado.
  * Retorna 0 (OK) ou -1 (erro, por exemplo, árvore nao incializada)
 */
-int invoke(MessageT *msg);
+int invoke(message_t *msg);
 
 #endif

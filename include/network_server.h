@@ -23,7 +23,7 @@ int network_main_loop(int listening_socket);
  * - De-serializar estes bytes e construir a mensagem com o pedido,
  *   reservando a memória necessária para a estrutura message_t.
  */
-struct MessageT *network_receive(int client_socket);
+struct message_t *network_receive(int client_socket);
 
 /* Esta função deve:
  * - Serializar a mensagem de resposta contida em msg;

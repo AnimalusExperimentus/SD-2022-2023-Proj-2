@@ -1,8 +1,8 @@
-#include "../include/tree_skel.h"
 #include <sys/socket.h>
 #include <stdlib.h>
 #include <netinet/in.h>
 #include <stdbool.h>
+#include "../include/tree_skel.h"
 #include "../include/network-private.h"
 
 #define SIZE_CLIENT_DEFAULT 1024
@@ -168,7 +168,7 @@ int network_main_loop(int listening_socket) {
                 continue;
             } else {
                 invoke(messageT);
-                network_send(client_socket,messageT);
+                network_send(client_socket, messageT);
             }
             close(client_socket);
         }
