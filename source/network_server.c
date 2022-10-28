@@ -6,9 +6,7 @@
 #include "../include/network-private.h"
 
 #define SIZE_CLIENT_DEFAULT 1024
-int listen_number;
-
-typedef MessageT message_t;
+int sckt;
 
 /* Função para preparar uma socket de receção de pedidos de ligação
  * num determinado porto.
@@ -21,38 +19,38 @@ int network_server_init(short port){
     }
 
     int socket_fd;
-    struct sockaddr_in *server, optional;
+    struct sockaddr_in server, optional;
 
-     if ((socket_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
+    if ((socket_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
         perror("Something went wrong");
         return -1;
     }
 
-    server = malloc(sizeof(struct sockaddr_in));
+    // server = malloc(sizeof(struct sockaddr_in));
 
-    server->sin_family = AF_INET;
-    server->sin_port = htons(port);
-    server->sin_addr.s_addr = htonl(INADDR_ANY);
+    server.sin_family = AF_INET;
+    server.sin_addr.s_addr = htonl(INADDR_ANY);
+    server.sin_port = htons(port);
 
     if (setsockopt(socket_fd, SOL_SOCKET, SO_REUSEADDR, &optional, sizeof(optional)) < 0) {
         perror("Something went wrong - SO_REUSEADDR");
         close(socket_fd);
         return -1;
     }
-
-      if (bind(socket_fd, (struct sockaddr *) server, sizeof(struct sockaddr_in)) < 0) {
+    
+    if (bind(socket_fd, (struct sockaddr *) &server, sizeof(server)) != 0) {
         perror("Something went wrong - bind server");
         close(socket_fd);
         return -1;
     }
+    
 
-      if (listen(socket_fd, 0) < 0) {
+    if (listen(socket_fd, 5) != 0) {
         perror("Something went wrong - listen server");
         close(socket_fd);
         return -1;
     }
 
-     free(server);
     return socket_fd;
 }
 
@@ -62,37 +60,37 @@ int network_server_init(short port){
  * - De-serializar estes bytes e construir a mensagem com o pedido,
  *   reservando a memória necessária para a estrutura message_t.
  */
-message_t *network_receive(int client_socket) {
-    if(client_socket<0){
+MessageT *network_receive(int client_socket) {
+
+    if(client_socket < 0) {
         perror("Invalid Socket");
         return NULL;
     }
 
-    unsigned buffer_size;
+    // read length of message and allocate buffer
+    unsigned len;
+    int r = read(client_socket, &len, sizeof(unsigned));
+    if (r == 0) {
+        printf("Client closed connection!\n");
+        return NULL;
+    }
+    char *buf = malloc(len);
 
-    
-    
-    read(client_socket, &buffer_size, sizeof(uint32_t));
-
-    unsigned response_size = ntohl(buffer_size);
-
-    char *buffer_reader = malloc(response_size);
-
-    // We put the message in messageT_response
-    if ((read_all(client_socket, buffer_reader, (int) response_size)) < 0) {
+    // read message into buffer
+    if ((read_all(client_socket, buf, (int) len)) < 0) {
         close(client_socket);
         return NULL;
     }
 
+    MessageT *msg;
+    msg = message_t__unpack(NULL, len, (const uint8_t *) buf);
+    free(buf);
+    if (msg == NULL) {
+        perror("Error unpacking message\n");
+        return NULL;
+    }
 
-
-    MessageT *messageT_deserialized = NULL;
-    messageT_deserialized = message_t__unpack(NULL, response_size, (const uint8_t *) buffer_reader);
-
-
-    free(buffer_reader);
-
-    return messageT_deserialized;
+    return msg;
 }
 
 
@@ -102,27 +100,28 @@ message_t *network_receive(int client_socket) {
  * - Enviar a mensagem serializada, através do client_socket.
  */
 int network_send(int client_socket, MessageT *msg) {
-     if (client_socket < 0 || msg == NULL) {
+    
+    if (client_socket < 0 || msg == NULL) {
         perror("Client socket or message tried to send is invalid");
         return -1;
     }
 
-    size_t buffer_size_host_server = message_t__get_packed_size(msg);
-    unsigned buffer_size = htonl(buffer_size_host_server);
+    // allocate buffer for packed message and pack it
+    unsigned len = message_t__get_packed_size(msg);
+    void *buf = malloc(len);
+    message_t__pack(msg, buf);
+    free(msg);
 
-     uint8_t *buffer_write = malloc(buffer_size);
-    // Serialization using protobuf
-    message_t__pack(msg, buffer_write);
-
-    write(client_socket, &buffer_size, sizeof(uint32_t));
-
-     if (write_all(client_socket, (char *) buffer_write, (int) buffer_size_host_server) < 0) {
-        free(msg);
+    // send message size first
+    write(client_socket, &len, sizeof(unsigned));
+    // send message
+    if (write_all(client_socket, (char *) buf, (int) len) < 0) {
+        free(buf);
         close(client_socket);
         return -1;
     }
 
-    free(buffer_write);
+    free(buf);
     return 0;
 }
 
@@ -131,7 +130,7 @@ int network_send(int client_socket, MessageT *msg) {
  * network_server_init().
  */
 int network_server_close() {
-    if (close(listen_number) == 0) {
+    if (close(sckt) == 0) {
         return 0;
     }
     return -1;
@@ -146,6 +145,7 @@ int network_server_close() {
  * - Enviar a resposta ao cliente usando a função network_send.
  */
 int network_main_loop(int listening_socket) {
+    
     struct sockaddr client;
     int client_socket;
     socklen_t size_client = SIZE_CLIENT_DEFAULT;
@@ -154,23 +154,37 @@ int network_main_loop(int listening_socket) {
         perror("Listening socket is invalid");
         return -1;
     }
+    sckt = listening_socket;
 
-    listen_number=listening_socket;
+    while(true) {
 
-    while(true)
-    {
-        if((client_socket=accept(listening_socket, &client, &size_client))!=-1) {
+        client_socket = accept(listening_socket, &client, &size_client);
+        if (client_socket == -1) {
+            perror("Error accepting client connection\n");
+            return -1;
+        }
+        
+        printf("Client connected!\n");
+
+        // read hello packet
+        char buf[1];
+        read(client_socket, buf, 1);
+
+        while(true) {
+            MessageT *messageT = network_receive(client_socket);
+            // printf("%i\n", (int) messageT->opcode);
+            // printf("%i\n", (int) messageT->c_type);
             
-            message_t *messageT = network_receive(client_socket);
-            
-            if (messageT == NULL || messageT->opcode == MESSAGE_T__OPCODE__OP_BAD ||
-                messageT->c_type == MESSAGE_T__C_TYPE__CT_BAD) {
+            if (messageT == NULL) {
+                close(client_socket);
+                break;
+            }else if (messageT->opcode == MESSAGE_T__OPCODE__OP_BAD || messageT->c_type == MESSAGE_T__C_TYPE__CT_BAD) {
+                // i think client never sends bad opcodes?
                 continue;
             } else {
                 invoke(messageT);
                 network_send(client_socket, messageT);
             }
-            close(client_socket);
         }
     }
     return 0;

@@ -1,8 +1,8 @@
 #include <unistd.h>
 #include <stdio.h>
 
-int write_all(int sock, char *buf, int len){
- int size = len;
+int write_all(int sock, char *buf, int len) {
+    int size = len;
     while (size > 0) {
         int res = (int) write(sock, buf, size);
         if (res < 0) {
@@ -16,8 +16,7 @@ int write_all(int sock, char *buf, int len){
 }
 
 
-
-int read_all(int sock, char *buf, int len){
+int read_all(int sock, char *buf, int len) {
     int size = len;
     while (size > 0) {
         int res = (int) read(sock, buf, size);
@@ -32,4 +31,3 @@ int read_all(int sock, char *buf, int len){
     }
     return len;
 }
-

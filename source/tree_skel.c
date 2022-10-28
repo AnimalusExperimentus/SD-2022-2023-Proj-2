@@ -6,6 +6,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 struct tree_t *tree;
 
@@ -45,7 +46,7 @@ int invoke(MessageT *msg) {
     int i;
     switch(msg->opcode) {
         case MESSAGE_T__OPCODE__OP_SIZE:
-            
+
             msg->opcode=MESSAGE_T__OPCODE__OP_SIZE+1;
             msg->c_type=MESSAGE_T__C_TYPE__CT_RESULT;
             msg->size=tree_size(tree);
@@ -62,41 +63,47 @@ int invoke(MessageT *msg) {
             
             i=tree_del(tree,msg->key);
             if(i==0){
-            msg->opcode=MESSAGE_T__OPCODE__OP_DEL+1;
+                msg->opcode=MESSAGE_T__OPCODE__OP_DEL+1;
             }else{
-            msg->opcode=MESSAGE_T__OPCODE__OP_ERROR;
+                msg->opcode=MESSAGE_T__OPCODE__OP_ERROR;
             }
             msg->c_type=MESSAGE_T__C_TYPE__CT_NONE;
             return 0;
 
         case MESSAGE_T__OPCODE__OP_GET:
-            
-            char* key = malloc(sizeof(msg->key));
-            strcpy(key,msg->key);
-            struct data_t *t = tree_get(tree,key);
 
-            ProtobufCBinaryData d ;
-            d.len = t->datasize;
-            d.data = malloc(t->datasize);
+            char* key = malloc(msg->size);
+            memcpy(key, msg->key, msg->size);
+            struct data_t *t = tree_get(tree, key);
+            free(key);
 
-            if(t == NULL){
-                msg->opcode=MESSAGE_T__OPCODE__OP_ERROR;
-                msg->c_type=MESSAGE_T__C_TYPE__CT_NONE;
-            }else{
+            // TODO: WHERE TO PUT THIS?? tree_get returns NULL on not finding anything...
+            // msg->opcode=MESSAGE_T__OPCODE__OP_ERROR;
+            // msg->c_type=MESSAGE_T__C_TYPE__CT_NONE;
+            if(t == NULL) {
                 msg->opcode=MESSAGE_T__OPCODE__OP_GET+1;
                 msg->c_type=MESSAGE_T__C_TYPE__CT_VALUE;
-                memcpy(d.data,t->data,t->datasize);
-                msg->data=d;
+                
+                msg->data.data = NULL;
+                msg->data.len = 0;
+                msg->size = 0;
+            } else {
+                msg->opcode=MESSAGE_T__OPCODE__OP_GET+1;
+                msg->c_type=MESSAGE_T__C_TYPE__CT_VALUE;
+                
+                msg->data.data = malloc(t->datasize);
+                msg->data.len = t->datasize;
+                msg->size = t->datasize;
+                memcpy(msg->data.data, t->data, msg->size);
             }
+            data_destroy(t);
             return 0;
 
         case MESSAGE_T__OPCODE__OP_PUT:
+            
+            struct data_t *new_data = data_create((int)msg->data.len);
+            memcpy(new_data->data, msg->data.data, msg->data.len);
 
-            struct data_t *new_data = data_create((int)msg->size);
-
-            memcpy(new_data->data, msg->data.data, new_data->datasize);
-
-            //put copia coisas de daria para guardar do outro lado
             int r = tree_put(tree, msg->key, new_data);
             data_destroy(new_data);
 

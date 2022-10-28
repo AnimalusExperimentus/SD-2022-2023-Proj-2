@@ -4,7 +4,7 @@
 *   Filipe Henriques nº55228
 *   Márcio Moreira nº41972
 */
-#include "../include/data.h"
+#include "../include/data.h" 
 #include <stdlib.h>
 #include <string.h>
 
@@ -13,7 +13,7 @@
  */
 struct data_t *data_create(int size) {
     
-    if (size < 1)
+    if (size < 0)
         return NULL;
     
     struct data_t *data;

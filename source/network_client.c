@@ -7,8 +7,6 @@
 #include <stdio.h>
 #include <unistd.h>
 
-typedef MessageT message_t;
-
 /* Esta função deve:
  * - Obter o endereço do servidor (struct sockaddr_in) a base da
  *   informação guardada na estrutura rtree;
@@ -17,22 +15,30 @@ typedef MessageT message_t;
  *   na estrutura rtree;
  * - Retornar 0 (OK) ou -1 (erro).
  */
-int network_connect(struct rtree_t *rtree){
+int network_connect(struct rtree_t *rtree) {
 
- if (rtree == NULL) {
+    if (rtree == NULL) {
         return -1;
     }
 
-    if ((rtree->sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-        perror("Error - socket");
+    // create socket and save in rtree
+    rtree->sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    if (rtree->sockfd < 0) {
+        perror("Error - socket creation");
         return -1;
     }
 
-     if (connect(rtree->sockfd, (const struct sockaddr *) &rtree->server, sizeof(rtree->server)) < 0) {
-        perror("connect");
+    // open connection to server
+    if (connect(rtree->sockfd, (const struct sockaddr *) &rtree->server, sizeof(rtree->server)) < 0) {
+        perror("Error - connect opening");
         close(rtree->sockfd);
         return -1;
     }
+
+    // send hello packet
+    char buf[1] = "1";
+    write(rtree->sockfd, buf, 1);
+
     return 0;
 }
 
@@ -45,53 +51,48 @@ int network_connect(struct rtree_t *rtree){
  * - De-serializar a mensagem de resposta;
  * - Retornar a mensagem de-serializada ou NULL em caso de erro.
  */
-message_t *network_send_receive(struct rtree_t * rtree, message_t *msg) {
+MessageT *network_send_receive(struct rtree_t * rtree, MessageT *msg) {
 
     if (rtree == NULL || msg == NULL) {
         perror("Client socket or message tried to send is invalid");
         return NULL;
     }
     
-    unsigned buffer_size_host = message_t__get_packed_size(msg);
-    unsigned buffer_size = htonl(buffer_size_host);
+    unsigned len = message_t__get_packed_size(msg);
 
-    void *buffer_write = malloc(buffer_size);
+    void *buf = malloc(len);
     // Serialization using protobuf
-    message_t__pack(msg, buffer_write);
+    message_t__pack(msg, buf);
 
-    write(rtree->sockfd,&buffer_write,sizeof(unsigned));
+    // send size of message to send
+    write(rtree->sockfd,&len,sizeof(unsigned));
 
-       if (write_all(rtree->sockfd, (char *) buffer_write, (int) buffer_size_host) < 0) {
-        free(msg);
+    // send packed message
+    if (write_all(rtree->sockfd, (char *) buf, (int) len) < 0) {
+        close(rtree->sockfd);
+        return NULL;
+    }
+    free(buf);
+
+
+    // get the size of the message to receive
+    unsigned len_rcv;
+    read(rtree->sockfd, &len_rcv, sizeof(unsigned));
+    
+    // allocate buf for message to receive
+    char *buf_rcv = malloc(len_rcv);
+
+    // read message into buf_rcv
+    if ((read_all(rtree->sockfd, (char *) buf_rcv, (int) len_rcv)) != len_rcv) {
+        free(buf_rcv);
         close(rtree->sockfd);
         return NULL;
     }
 
-    free(buffer_write);
+    MessageT *messageT_deserialized = NULL;
+    messageT_deserialized = message_t__unpack(NULL, len_rcv, (const uint8_t *) buf_rcv);
 
-    unsigned buffer_size_client;
-
-    // First we received the size of the message
-    read(rtree->sockfd, &buffer_size_client, sizeof(uint32_t));
-
-    unsigned response_size = ntohl(buffer_size_client);
-
-    char *buffer_reader = malloc(response_size);
-
-    // We put the message in messageT_response
-    if ((read_all(rtree->sockfd, (char *) buffer_reader, (int) response_size)) != response_size) {
-        free(msg);
-        close(rtree->sockfd);
-        return NULL;
-    }
-
-    message_t *messageT_deserialized = NULL;
-    //message_t__unpack(NULL, response_size, (const uint8_t *) buffer_reader);
-    messageT_deserialized = message_t__unpack(NULL, response_size, (const uint8_t *) buffer_reader);
-
-
-    // Finally, free all memory allocated
-    free(buffer_reader);
+    free(buf_rcv);
     return messageT_deserialized;
 }
                                        
@@ -103,7 +104,6 @@ int network_close(struct rtree_t * rtree){
      if (close(rtree->sockfd) == -1) {
         return -1;
     }
-    free(rtree);
     return 0;
 }
 

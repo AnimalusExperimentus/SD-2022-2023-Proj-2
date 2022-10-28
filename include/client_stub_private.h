@@ -3,6 +3,8 @@
 
 #include <netinet/in.h>
 
+/* Remote tree.
+ */
 struct rtree_t {  
     struct sockaddr_in server;
     int sockfd;

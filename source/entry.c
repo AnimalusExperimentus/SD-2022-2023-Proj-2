@@ -17,17 +17,16 @@
  * memória para estes campos.
  */
 struct entry_t *entry_create(char *key, struct data_t *data){
-    struct entry_t *entry;
-    entry=malloc(sizeof(struct entry_t));
-
+    
     if(key==NULL&&data==NULL){
-        free(entry);
         return NULL;
     }
-
-    entry->key=malloc(strlen(key)+1);
-    entry->key=key;
-    entry->value=data;
+    
+    struct entry_t *entry;
+    entry = malloc(sizeof(struct entry_t));
+    
+    entry->key = key;
+    entry->value = data;
     
     return entry;
 }
@@ -37,10 +36,9 @@ struct entry_t *entry_create(char *key, struct data_t *data){
  */
 void entry_destroy(struct entry_t *entry){
 
-    if(entry!=NULL){
-    data_destroy(entry->value);
-    free(entry->key);
-    free(entry);
+    if(entry != NULL){
+        data_destroy(entry->value);
+        free(entry);
     }
 }
 
