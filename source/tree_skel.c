@@ -72,8 +72,10 @@ int invoke(MessageT *msg) {
 
         case MESSAGE_T__OPCODE__OP_GET:
 
-            char* key = malloc(msg->size);
+            char* key = malloc(msg->size+1);
+            memset(key, '\0', msg->size+1);
             memcpy(key, msg->key, msg->size);
+
             struct data_t *t = tree_get(tree, key);
             free(key);
 
@@ -83,7 +85,7 @@ int invoke(MessageT *msg) {
             if(t == NULL) {
                 msg->opcode=MESSAGE_T__OPCODE__OP_GET+1;
                 msg->c_type=MESSAGE_T__C_TYPE__CT_VALUE;
-                
+                printf("COULD NOT FIND ENTRY\n");
                 msg->data.data = NULL;
                 msg->data.len = 0;
                 msg->size = 0;
@@ -103,9 +105,14 @@ int invoke(MessageT *msg) {
             
             struct data_t *new_data = data_create((int)msg->data.len);
             memcpy(new_data->data, msg->data.data, msg->data.len);
+            char* temp_key = malloc(msg->size);
+            memcpy(temp_key, msg->key, msg->size);
+            
+            printf("%s\n", temp_key);
 
-            int r = tree_put(tree, msg->key, new_data);
+            int r = tree_put(tree, temp_key, new_data);
             data_destroy(new_data);
+            free(temp_key);
 
             if(r == 0){
                 msg->opcode=MESSAGE_T__OPCODE__OP_PUT+1;

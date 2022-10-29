@@ -16,7 +16,7 @@
  * string e o bloco de dados passados como parâmetros, sem reservar
  * memória para estes campos.
  */
-struct entry_t *entry_create(char *key, struct data_t *data){
+struct entry_t *entry_create(char *key, struct data_t *data) {
     
     if(key==NULL&&data==NULL){
         return NULL;
@@ -34,7 +34,7 @@ struct entry_t *entry_create(char *key, struct data_t *data){
 
 /* Função que elimina uma entry, libertando a memória por ela ocupada
  */
-void entry_destroy(struct entry_t *entry){
+void entry_destroy(struct entry_t *entry) {
 
     if(entry != NULL){
         data_destroy(entry->value);
@@ -46,7 +46,7 @@ void entry_destroy(struct entry_t *entry){
 /* Função que duplica uma entry, reservando a memória necessária para a
  * nova estrutura.
  */
-struct entry_t *entry_dup(struct entry_t *entry){
+struct entry_t *entry_dup(struct entry_t *entry) {
 
 
     struct entry_t *ptr;
@@ -64,7 +64,7 @@ struct entry_t *entry_dup(struct entry_t *entry){
 /* Função que substitui o conteúdo de uma entrada entry_t.
 *  Deve assegurar que destroi o conteúdo antigo da mesma.
 */
-void entry_replace(struct entry_t *entry, char *new_key, struct data_t *new_value){
+void entry_replace(struct entry_t *entry, char *new_key, struct data_t *new_value) {
     data_destroy(entry->value);
     free(entry->key);
 
@@ -77,17 +77,7 @@ void entry_replace(struct entry_t *entry, char *new_key, struct data_t *new_valu
 *  Ordem das entradas é definida pela ordem das suas chaves.
 *  A função devolve 0 se forem iguais, -1 se entry1<entry2, e 1 caso contrário.
 */
-int entry_compare(struct entry_t *entry1, struct entry_t *entry2){
+int entry_compare(struct entry_t *entry1, struct entry_t *entry2) {
 
-  int val;
-
-  if(entry1->key==entry2->key){
-      val=0;
-
-  }else if(entry1->key<entry2->key){
-      val=-1;
-  }else{
-      val=1;
-  }
-  return val;
+    return strcmp(entry1->key, entry2->key);
 }

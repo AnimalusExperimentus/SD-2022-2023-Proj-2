@@ -111,6 +111,7 @@ int rtree_put(struct rtree_t *rtree, struct entry_t *entry) {
 
     msg.key = malloc(strlen(entry->key));
     memcpy(msg.key, entry->key, strlen(entry->key));
+    msg.size = strlen(entry->key);
     msg.data.len = entry->value->datasize;
     msg.data.data = malloc(entry->value->datasize);
     memcpy(msg.data.data, entry->value->data, entry->value->datasize);
