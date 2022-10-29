@@ -44,6 +44,7 @@ int invoke(MessageT *msg) {
         return -1;
     }
     int i;
+    char *key;
     switch(msg->opcode) {
         case MESSAGE_T__OPCODE__OP_SIZE:
 
@@ -60,19 +61,24 @@ int invoke(MessageT *msg) {
             return 0;
 
         case MESSAGE_T__OPCODE__OP_DEL:
+
+            key = malloc(msg->size+1);
+            memset(key, '\0', msg->size+1);
+            memcpy(key, msg->key, msg->size);
             
-            i=tree_del(tree,msg->key);
+            i=tree_del(tree,key);
             if(i==0){
                 msg->opcode=MESSAGE_T__OPCODE__OP_DEL+1;
             }else{
                 msg->opcode=MESSAGE_T__OPCODE__OP_ERROR;
+                printf("COULD NOT FIND ENTRY\n");
             }
             msg->c_type=MESSAGE_T__C_TYPE__CT_NONE;
             return 0;
 
         case MESSAGE_T__OPCODE__OP_GET:
 
-            char* key = malloc(msg->size+1);
+            key = malloc(msg->size+1);
             memset(key, '\0', msg->size+1);
             memcpy(key, msg->key, msg->size);
 
@@ -123,12 +129,14 @@ int invoke(MessageT *msg) {
             return 0;
 
         case MESSAGE_T__OPCODE__OP_GETKEYS:
-            
-            char** kk = tree_get_keys(tree);
-            msg->opcode=MESSAGE_T__OPCODE__OP_GETKEYS+1;
-            msg->c_type=MESSAGE_T__C_TYPE__CT_KEYS;
+
             msg->n_keys=tree_size(tree);
-            msg->keys=kk;
+            char** kk = malloc((sizeof(char**)*msg->n_keys)+sizeof(char**));
+            kk = tree_get_keys(tree);
+            msg->opcode=MESSAGE_T__OPCODE__OP_GETKEYS+1;
+            msg->c_type=MESSAGE_T__C_TYPE__CT_KEYS;           
+            memcpy(msg->keys,kk,sizeof(kk));//duvidas nao so copia endereços teria que passar por tudo novamente
+           
             return 0;
 
         case MESSAGE_T__OPCODE__OP_GETVALUES:
@@ -136,21 +144,10 @@ int invoke(MessageT *msg) {
             void **val = tree_get_values(tree);
             msg->opcode=MESSAGE_T__OPCODE__OP_GETVALUES;
             msg->c_type=MESSAGE_T__C_TYPE__CT_VALUES;
-            msg->size=sizeof(val);
+            msg->size=sizeof(val);//??
             // msg->data=?;
             return 0;
 
-        case MESSAGE_T__OPCODE__OP_BAD:
-            // TODO
-            return 0;
-
-        case MESSAGE_T__OPCODE__OP_ERROR:
-            // TODO
-            return 0;
-
-        case _MESSAGE_T__OPCODE_IS_INT_SIZE:
-            // TODO
-            return 0;
     }
     return -1;
 }

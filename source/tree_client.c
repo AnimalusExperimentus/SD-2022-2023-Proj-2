@@ -76,16 +76,17 @@ int main(int argc, char *argv[]) {
             } else {
                 printf("Value found for this key: %.*s\n", d->datasize, (char*)d->data);
             }
-
+    //DEL--------------------------------------------------------------------------
         } else if (strcmp(command, "del") == 0) {
             char* key = strtok(NULL, " ");
             if (key == NULL || strtok(NULL, " ") != NULL){
                 printf("syntax: del <key>\n");
                 continue;
             }
-            // printf("%s\n",key);
-            //TODO
-            else {
+            
+            if(rtree_del(rtree,key)==0){
+                printf("Deleted entry dor key: %s \n",key);
+            }else {
               printf("Error on del\n");
             }
         // SIZE -----------------------------------------------------
@@ -117,21 +118,27 @@ int main(int argc, char *argv[]) {
             }
 
             printf("Tree height is currently %i\n", r);
-
+//KEYS--------------------------------------------------------------------------------------
         } else if (strcmp(command, "getkeys") == 0) {
-            char* key = strtok(NULL, " ");
-            if (key == NULL || strtok(NULL, " ") != NULL){
-                printf("syntax: getkeys <key>\n");
+            if (strtok(NULL, " ") != NULL){
+                printf("syntax: getkeys \n");
                 continue;
             }
-            // printf("%s\n",key);
-            //TODO
-            else {
-              printf("Error on getkeys\n");
+            char** keys;
+
+            keys=rtree_get_keys(rtree);
+            if(keys==NULL){
+                printf("Error on getkeys\n");
             }
+            else {
+              for(int i=0;i<rtree_size(rtree);i++){
+                printf(": %s \n,",keys[i]);
+              }
+              printf("\n");
+            }
+//GETVALUES----------------------------------------------------------------------------------------
         } else if (strcmp(command, "getvalues") == 0) {
-            char* key = strtok(NULL, " ");
-            if (key == NULL || strtok(NULL, " ") != NULL){
+            if (strtok(NULL, " ") != NULL){
                 printf("syntax: getvalues <key>\n");
                 continue;
             }
