@@ -234,11 +234,11 @@ int rtree_height(struct rtree_t *rtree){
 
 /* Devolve um array de char* com a cópia de todas as keys da árvore,
  * colocando um último elemento a NULL.
- */
+ *//*
  char **rtree_get_keys(struct rtree_t *rtree){
 
  
-/*
+
 //   struct _MessageT *msg = create_message(MESSAGE_T__OPCODE__OP_GETKEYS,MESSAGE_T__C_TYPE__CT_NONE);
 //   //struct _MessageT msg = MESSAGE_T__INIT;
 
@@ -252,10 +252,10 @@ int rtree_height(struct rtree_t *rtree){
 
 //   return msg->keys;
 
-*/
+
  }
 
-
+*/
 /* Devolve um array de void* com a cópia de todas os values da árvore,
  * colocando um último elemento a NULL.
  */
