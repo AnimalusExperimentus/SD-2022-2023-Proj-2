@@ -16,6 +16,7 @@ PROTOBUF_C__BEGIN_DECLS
 
 
 typedef struct _MessageT MessageT;
+typedef struct _MessageT__Value MessageT__Value;
 
 
 /* --- enums --- */
@@ -46,6 +47,16 @@ typedef enum _MessageT__CType {
 
 /* --- messages --- */
 
+struct  _MessageT__Value
+{
+  ProtobufCMessage base;
+  ProtobufCBinaryData data;
+};
+#define MESSAGE_T__VALUE__INIT \
+ { PROTOBUF_C_MESSAGE_INIT (&message_t__value__descriptor) \
+    , {0,NULL} }
+
+
 struct  _MessageT
 {
   ProtobufCMessage base;
@@ -56,12 +67,17 @@ struct  _MessageT
   ProtobufCBinaryData data;
   size_t n_keys;
   char **keys;
+  size_t n_vals;
+  MessageT__Value **vals;
 };
 #define MESSAGE_T__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&message_t__descriptor) \
-    , MESSAGE_T__OPCODE__OP_BAD, MESSAGE_T__C_TYPE__CT_BAD, (char *)protobuf_c_empty_string, 0, {0,NULL}, 0,NULL }
+    , MESSAGE_T__OPCODE__OP_BAD, MESSAGE_T__C_TYPE__CT_BAD, (char *)protobuf_c_empty_string, 0, {0,NULL}, 0,NULL, 0,NULL }
 
 
+/* MessageT__Value methods */
+void   message_t__value__init
+                     (MessageT__Value         *message);
 /* MessageT methods */
 void   message_t__init
                      (MessageT         *message);
@@ -83,6 +99,9 @@ void   message_t__free_unpacked
                       ProtobufCAllocator *allocator);
 /* --- per-message closures --- */
 
+typedef void (*MessageT__Value_Closure)
+                 (const MessageT__Value *message,
+                  void *closure_data);
 typedef void (*MessageT_Closure)
                  (const MessageT *message,
                   void *closure_data);
@@ -93,6 +112,7 @@ typedef void (*MessageT_Closure)
 /* --- descriptors --- */
 
 extern const ProtobufCMessageDescriptor message_t__descriptor;
+extern const ProtobufCMessageDescriptor message_t__value__descriptor;
 extern const ProtobufCEnumDescriptor    message_t__opcode__descriptor;
 extern const ProtobufCEnumDescriptor    message_t__c_type__descriptor;
 

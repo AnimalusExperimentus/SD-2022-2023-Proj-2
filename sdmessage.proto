@@ -31,6 +31,9 @@ message message_t
         bytes data = 5;
         repeated string keys = 6;
         
-
-
+        message Value
+        {
+                bytes data = 1;
+        }
+        repeated Value vals = 7;
 };

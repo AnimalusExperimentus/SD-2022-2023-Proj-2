@@ -13,18 +13,6 @@
 #include <arpa/inet.h>
 #include <stdio.h>
 #include "string.h"
-// #include <unistd.h>
-
-/*
- *Função auxiliar
- */
-// int any_error(short op_f) {
-
-//   if (op_f == MESSAGE_T__OPCODE__OP_ERROR) {
-//     return -1;
-//   }
-//   return 0;
-// }
 
 
 /* Função para estabelecer uma associação entre o cliente e o servidor,
@@ -282,6 +270,35 @@ char **rtree_get_keys(struct rtree_t *rtree) {
 /* Devolve um array de void* com a cópia de todas os values da árvore,
  * colocando um último elemento a NULL.
  */
-// void **rtree_get_values(struct rtree_t *rtree) {
+void **rtree_get_values(struct rtree_t *rtree) {
 
-// }
+    MessageT msg = MESSAGE_T__INIT;
+    msg.opcode = MESSAGE_T__OPCODE__OP_GETVALUES;
+    msg.c_type = MESSAGE_T__C_TYPE__CT_NONE;
+
+    MessageT *msg_rcv = network_send_receive(rtree, &msg);
+    if (msg_rcv == NULL) {
+        message_t__free_unpacked(msg_rcv, NULL);
+        return NULL;
+    }
+    if (msg_rcv->opcode == MESSAGE_T__OPCODE__OP_ERROR) {
+        message_t__free_unpacked(msg_rcv, NULL);
+        return NULL;
+    }
+
+    // build result array
+    int n_values = msg_rcv->n_vals;
+    void **result_arr = malloc(sizeof(struct data_t *)*n_values+1);
+    result_arr[n_values] = NULL;
+    for (int i = 0; i < n_values; i++) {
+
+        struct data_t *d = malloc(sizeof(struct data_t *));
+        d->datasize = msg_rcv->vals[i]->data.len;
+        d->data = malloc(d->datasize);
+        memcpy(d->data, msg_rcv->vals[i]->data.data, d->datasize);
+        result_arr[i] = d;
+    }
+    
+    message_t__free_unpacked(msg_rcv, NULL);
+    return result_arr;
+}

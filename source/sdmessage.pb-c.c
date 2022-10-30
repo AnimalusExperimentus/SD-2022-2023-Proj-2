@@ -7,6 +7,12 @@
 #endif
 
 #include "sdmessage.pb-c.h"
+void   message_t__value__init
+                     (MessageT__Value         *message)
+{
+  static const MessageT__Value init_value = MESSAGE_T__VALUE__INIT;
+  *message = init_value;
+}
 void   message_t__init
                      (MessageT         *message)
 {
@@ -52,6 +58,44 @@ void   message_t__free_unpacked
   assert(message->base.descriptor == &message_t__descriptor);
   protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
 }
+static const ProtobufCFieldDescriptor message_t__value__field_descriptors[1] =
+{
+  {
+    "data",
+    1,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_BYTES,
+    0,   /* quantifier_offset */
+    offsetof(MessageT__Value, data),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+};
+static const unsigned message_t__value__field_indices_by_name[] = {
+  0,   /* field[0] = data */
+};
+static const ProtobufCIntRange message_t__value__number_ranges[1 + 1] =
+{
+  { 1, 0 },
+  { 0, 1 }
+};
+const ProtobufCMessageDescriptor message_t__value__descriptor =
+{
+  PROTOBUF_C__MESSAGE_DESCRIPTOR_MAGIC,
+  "message_t.Value",
+  "Value",
+  "MessageT__Value",
+  "",
+  sizeof(MessageT__Value),
+  1,
+  message_t__value__field_descriptors,
+  message_t__value__field_indices_by_name,
+  1,  message_t__value__number_ranges,
+  (ProtobufCMessageInit) message_t__value__init,
+  NULL,NULL,NULL    /* reserved[123] */
+};
 static const ProtobufCEnumValue message_t__opcode__enum_values_by_number[9] =
 {
   { "OP_BAD", "MESSAGE_T__OPCODE__OP_BAD", 0 },
@@ -134,7 +178,7 @@ const ProtobufCEnumDescriptor message_t__c_type__descriptor =
   message_t__c_type__value_ranges,
   NULL,NULL,NULL,NULL   /* reserved[1234] */
 };
-static const ProtobufCFieldDescriptor message_t__field_descriptors[6] =
+static const ProtobufCFieldDescriptor message_t__field_descriptors[7] =
 {
   {
     "opcode",
@@ -208,6 +252,18 @@ static const ProtobufCFieldDescriptor message_t__field_descriptors[6] =
     0,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
+  {
+    "vals",
+    7,
+    PROTOBUF_C_LABEL_REPEATED,
+    PROTOBUF_C_TYPE_MESSAGE,
+    offsetof(MessageT, n_vals),
+    offsetof(MessageT, vals),
+    &message_t__value__descriptor,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
 };
 static const unsigned message_t__field_indices_by_name[] = {
   1,   /* field[1] = c_type */
@@ -216,11 +272,12 @@ static const unsigned message_t__field_indices_by_name[] = {
   5,   /* field[5] = keys */
   0,   /* field[0] = opcode */
   3,   /* field[3] = size */
+  6,   /* field[6] = vals */
 };
 static const ProtobufCIntRange message_t__number_ranges[1 + 1] =
 {
   { 1, 0 },
-  { 0, 6 }
+  { 0, 7 }
 };
 const ProtobufCMessageDescriptor message_t__descriptor =
 {
@@ -230,7 +287,7 @@ const ProtobufCMessageDescriptor message_t__descriptor =
   "MessageT",
   "",
   sizeof(MessageT),
-  6,
+  7,
   message_t__field_descriptors,
   message_t__field_indices_by_name,
   1,  message_t__number_ranges,

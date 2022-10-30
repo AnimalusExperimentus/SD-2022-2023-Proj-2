@@ -118,7 +118,7 @@ int main(int argc, char *argv[]) {
             }
 
             printf("Tree height is currently %i\n", r);
-            
+
         //KEYS----------------------------------------------------
         } else if (strcmp(command, "getkeys") == 0) {
             if (strtok(NULL, " ") != NULL){
@@ -143,10 +143,17 @@ int main(int argc, char *argv[]) {
                 continue;
             }
 
-            // else {
-            //   printf("Error on getvalues\n");
-            // }
-        
+            void **values = rtree_get_values(rtree);
+            if (values == NULL) {
+                printf("Error on getvalues\n");
+            } else {
+                for (int i = 0; values[i] != NULL; i++) {
+                    struct data_t *d = values[i];
+                    int n = d->datasize;
+                    printf("%.*s\n", n, (char *)d->data);
+                }
+            }
+        //NOEXIST-----------------------------------------------
         } else {
             printf("That command doesn't exist.\n");
         }

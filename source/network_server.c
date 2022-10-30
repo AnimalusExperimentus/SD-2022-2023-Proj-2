@@ -172,15 +172,10 @@ int network_main_loop(int listening_socket) {
 
         while(true) {
             MessageT *messageT = network_receive(client_socket);
-            // printf("%i\n", (int) messageT->opcode);
-            // printf("%i\n", (int) messageT->c_type);
             
             if (messageT == NULL) {
                 close(client_socket);
                 break;
-            }else if (messageT->opcode == MESSAGE_T__OPCODE__OP_BAD || messageT->c_type == MESSAGE_T__C_TYPE__CT_BAD) {
-                // i think client never sends bad opcodes?
-                continue;
             } else {
                 invoke(messageT);
                 network_send(client_socket, messageT);

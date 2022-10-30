@@ -151,13 +151,42 @@ int invoke(MessageT *msg) {
 
         case MESSAGE_T__OPCODE__OP_GETVALUES:
             
-            // void **val = tree_get_values(tree);
-            // msg->opcode=MESSAGE_T__OPCODE__OP_GETVALUES;
-            // msg->c_type=MESSAGE_T__C_TYPE__CT_VALUES;
-            // msg->size=sizeof(val);//??
-            // // msg->data=?;
+            void **val = tree_get_values(tree);
+
+            if (val != NULL) {
+                msg->opcode=MESSAGE_T__OPCODE__OP_GETVALUES+1;
+                msg->c_type=MESSAGE_T__C_TYPE__CT_VALUES;
+
+                
+                int size = 0;
+                for (int i = 0; val[i] != NULL; i++) {
+                    size++;
+                }
+
+                msg->n_vals = size;
+                msg->vals = malloc(sizeof(MessageT__Value *)*size);
+                
+                for (int i = 0; i < size; i++)
+                {
+                    struct data_t *d = val[i];
+
+                    MessageT__Value *v;
+                    v = malloc(sizeof(MessageT__Value));
+                    message_t__value__init(v);
+                    v->data.len = d->datasize;
+                    v->data.data = malloc(d->datasize);
+                    v->data.data = memcpy(v->data.data, d->data, d->datasize);
+                    msg->vals[i] = v;
+                }
+
+            } else {
+                msg->opcode=MESSAGE_T__OPCODE__OP_ERROR;
+                msg->c_type=MESSAGE_T__C_TYPE__CT_NONE;
+                printf("val is null\n");
+            }
             return 0;
-        
+            
+        // so compiler doesn't scream at us
         case MESSAGE_T__OPCODE__OP_BAD:
             return 0;
         case MESSAGE_T__OPCODE__OP_ERROR:
