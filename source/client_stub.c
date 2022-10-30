@@ -18,13 +18,13 @@
 /*
  *Função auxiliar
  */
-int any_error(short op_f) {
+// int any_error(short op_f) {
 
-  if (op_f == MESSAGE_T__OPCODE__OP_ERROR) {
-    return -1;
-  }
-  return 0;
-}
+//   if (op_f == MESSAGE_T__OPCODE__OP_ERROR) {
+//     return -1;
+//   }
+//   return 0;
+// }
 
 
 /* Função para estabelecer uma associação entre o cliente e o servidor,
@@ -82,7 +82,7 @@ int rtree_disconnect(struct rtree_t *rtree) {
 }
 
 
-//---------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------
 /* Função para adicionar um elemento na árvore.
  * Se a key já existe, vai substituir essa entrada pelos novos dados.
  * Devolve 0 (ok, em adição/substituição) ou -1 (problemas).
@@ -105,8 +105,14 @@ int rtree_put(struct rtree_t *rtree, struct entry_t *entry) {
     MessageT *msg_rcv = network_send_receive(rtree, &msg);
     free(msg.key);
     free(msg.data.data);
-    if (msg_rcv == NULL) {return -1;}
-    if (any_error(msg_rcv->opcode) != 0) {return -1;}
+    if (msg_rcv == NULL) {
+        message_t__free_unpacked(msg_rcv, NULL);
+        return -1;
+    }
+    if (msg_rcv->opcode == MESSAGE_T__OPCODE__OP_ERROR) {
+        message_t__free_unpacked(msg_rcv, NULL);
+        return -1;
+    }
     
     message_t__free_unpacked(msg_rcv, NULL);
     return 0;
@@ -190,15 +196,21 @@ int rtree_del(struct rtree_t *rtree, char *key){
 
 /* Devolve o número de elementos contidos na árvore.
  */
-int rtree_size(struct rtree_t *rtree){
+int rtree_size(struct rtree_t *rtree) {
 
     MessageT msg = MESSAGE_T__INIT;
     msg.opcode = MESSAGE_T__OPCODE__OP_SIZE;
     msg.c_type = MESSAGE_T__C_TYPE__CT_NONE;
 
     MessageT *msg_rcv = network_send_receive(rtree, &msg);
-    if (msg_rcv == NULL) {return -1;}
-    if (any_error(msg_rcv->opcode) != 0) {return -1;}
+    if (msg_rcv == NULL) {
+        message_t__free_unpacked(msg_rcv, NULL);
+        return -1;
+    }
+    if (msg_rcv->opcode == MESSAGE_T__OPCODE__OP_ERROR) {
+        message_t__free_unpacked(msg_rcv, NULL);
+        return -1;
+    }
     
     int size = msg_rcv->size;
     message_t__free_unpacked(msg_rcv, NULL);
@@ -209,48 +221,64 @@ int rtree_size(struct rtree_t *rtree){
 
 /* Função que devolve a altura da árvore.
  */
-int rtree_height(struct rtree_t *rtree){
+int rtree_height(struct rtree_t *rtree) {
 
     MessageT msg = MESSAGE_T__INIT;
     msg.opcode = MESSAGE_T__OPCODE__OP_HEIGHT;
     msg.c_type = MESSAGE_T__C_TYPE__CT_NONE;
 
     MessageT *msg_rcv = network_send_receive(rtree, &msg);
-    if (msg_rcv == NULL) {return -1;}
-    if (any_error(msg_rcv->opcode) != 0) {return -1;}
+    if (msg_rcv == NULL) {
+        message_t__free_unpacked(msg_rcv, NULL);
+        return -1;
+    }
+    if (msg_rcv->opcode == MESSAGE_T__OPCODE__OP_ERROR) {
+        message_t__free_unpacked(msg_rcv, NULL);
+        return -1;
+    }
     
     int size = msg_rcv->size;
     message_t__free_unpacked(msg_rcv, NULL);
 
     return size;
-
 }
 
 
 /* Devolve um array de char* com a cópia de todas as keys da árvore,
  * colocando um último elemento a NULL.
- *//*
- char **rtree_get_keys(struct rtree_t *rtree){
+ */
+char **rtree_get_keys(struct rtree_t *rtree) {
 
- 
+    MessageT msg = MESSAGE_T__INIT;
+    msg.opcode = MESSAGE_T__OPCODE__OP_GETKEYS;
+    msg.c_type = MESSAGE_T__C_TYPE__CT_NONE;
 
-//   struct _MessageT *msg = create_message(MESSAGE_T__OPCODE__OP_GETKEYS,MESSAGE_T__C_TYPE__CT_NONE);
-//   //struct _MessageT msg = MESSAGE_T__INIT;
+    MessageT *msg_rcv = network_send_receive(rtree, &msg);
+    if (msg_rcv == NULL) {
+        message_t__free_unpacked(msg_rcv, NULL);
+        return NULL;
+    }
+    if (msg_rcv->opcode == MESSAGE_T__OPCODE__OP_ERROR) {
+        message_t__free_unpacked(msg_rcv, NULL);
+        return NULL;
+    }
 
-//   if ((msg = network_send_receive(rtree,msg))==NULL) {
-//     return NULL;
-//   }
+    // copy keys to local array to return
+    int size = msg_rcv->n_keys;
+    char **key_arr = malloc(size+1);
+    key_arr[size] = NULL;
+    
+    for (int i = 0; i < size; i++) {
+        int len = strlen(msg_rcv->keys[i]) + 1;
+        key_arr[i] = malloc(len);
+        memcpy(key_arr[i], msg_rcv->keys[i], len);
+    }
+    message_t__free_unpacked(msg_rcv, NULL);
+    
+    return key_arr;
+}
 
-//   if (any_error(msg->opcode,MESSAGE_T__OPCODE__OP_DEL) != 0) {
-//     return NULL;
-//   }
 
-//   return msg->keys;
-
-
- }
-
-*/
 /* Devolve um array de void* com a cópia de todas os values da árvore,
  * colocando um último elemento a NULL.
  */

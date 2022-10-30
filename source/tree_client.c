@@ -118,24 +118,24 @@ int main(int argc, char *argv[]) {
             }
 
             printf("Tree height is currently %i\n", r);
+            
         //KEYS----------------------------------------------------
         } else if (strcmp(command, "getkeys") == 0) {
             if (strtok(NULL, " ") != NULL){
                 printf("syntax: getkeys \n");
                 continue;
             }
-            // char** keys;
 
-            // keys=rtree_get_keys(rtree);
-            // if(keys==NULL){
-            //     printf("Error on getkeys\n");
-            // }
-            // else {
-            //   for(int i=0;i<rtree_size(rtree);i++){
-            //     printf(": %s \n,",keys[i]);
-            //   }
-            //   printf("\n");
-            // }
+            char** keys = rtree_get_keys(rtree);
+            
+            if(keys==NULL){
+                printf("Error on getkeys\n");
+            } else {
+                for (int i = 0; keys[i] != NULL; i++) {
+                    printf("%s\n", keys[i]);
+                }
+            }
+
         //GETVALUES-----------------------------------------------
         } else if (strcmp(command, "getvalues") == 0) {
             if (strtok(NULL, " ") != NULL) {

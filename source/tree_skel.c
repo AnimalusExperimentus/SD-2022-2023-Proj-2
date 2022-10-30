@@ -128,13 +128,25 @@ int invoke(MessageT *msg) {
 
         case MESSAGE_T__OPCODE__OP_GETKEYS:
 
-            // msg->n_keys=tree_size(tree);
-            // char** kk = malloc((sizeof(char**)*msg->n_keys)+sizeof(char**));
-            // kk = tree_get_keys(tree);
-            // msg->opcode=MESSAGE_T__OPCODE__OP_GETKEYS+1;
-            // msg->c_type=MESSAGE_T__C_TYPE__CT_KEYS;           
-            // memcpy(msg->keys,kk,sizeof(kk));//duvidas nao so copia endereços teria que passar por tudo novamente
-           
+            char** kk = tree_get_keys(tree);
+
+            if(kk != NULL){
+                msg->opcode=MESSAGE_T__OPCODE__OP_GETKEYS+1;
+                msg->c_type=MESSAGE_T__C_TYPE__CT_KEYS;
+
+                int size = 0;
+                for (int i = 0; kk[i] != NULL; i++) {
+                    size++;
+                }
+                
+                // to msg
+                msg->n_keys = size;
+                msg->keys = kk;
+
+            }else{ 
+                msg->opcode=MESSAGE_T__OPCODE__OP_ERROR;
+                msg->c_type=MESSAGE_T__C_TYPE__CT_NONE;
+            }
             return 0;
 
         case MESSAGE_T__OPCODE__OP_GETVALUES:
