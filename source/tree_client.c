@@ -76,20 +76,20 @@ int main(int argc, char *argv[]) {
             } else {
                 printf("Value found for this key: %.*s\n", d->datasize, (char*)d->data);
             }
-    //DEL--------------------------------------------------------------------------
+        //DEL-----------------------------------------------------
         } else if (strcmp(command, "del") == 0) {
-            char* key = strtok(NULL, " ");
+            char* key = strtok(NULL, " \n");
             if (key == NULL || strtok(NULL, " ") != NULL){
                 printf("syntax: del <key>\n");
                 continue;
             }
             
-            if(rtree_del(rtree,key)==0){
-                printf("Deleted entry dor key: %s \n",key);
+            if(rtree_del(rtree,key) == 0) {
+                printf("Deleted entry for key: %s \n", key);
             }else {
-              printf("Error on del\n");
+              printf("Key not found or error on delete\n");
             }
-        // SIZE -----------------------------------------------------
+        // SIZE ---------------------------------------------------
         } else if (strcmp(command, "size") == 0) {
             if (strtok(NULL, " ") != NULL){
                 printf("syntax: size\n");
@@ -104,7 +104,7 @@ int main(int argc, char *argv[]) {
 
             printf("Tree size is currently %i\n", r);
 
-        // HEIGHT -----------------------------------------------------
+        // HEIGHT -----------------------------------------------
         } else if (strcmp(command, "height") == 0) {
             if (strtok(NULL, " ") != NULL){
                 printf("syntax: height\n");
@@ -118,35 +118,35 @@ int main(int argc, char *argv[]) {
             }
 
             printf("Tree height is currently %i\n", r);
-//KEYS--------------------------------------------------------------------------------------
+        //KEYS----------------------------------------------------
         } else if (strcmp(command, "getkeys") == 0) {
             if (strtok(NULL, " ") != NULL){
                 printf("syntax: getkeys \n");
                 continue;
             }
-            char** keys;
+            // char** keys;
 
-            keys=rtree_get_keys(rtree);
-            if(keys==NULL){
-                printf("Error on getkeys\n");
-            }
-            else {
-              for(int i=0;i<rtree_size(rtree);i++){
-                printf(": %s \n,",keys[i]);
-              }
-              printf("\n");
-            }
-//GETVALUES----------------------------------------------------------------------------------------
+            // keys=rtree_get_keys(rtree);
+            // if(keys==NULL){
+            //     printf("Error on getkeys\n");
+            // }
+            // else {
+            //   for(int i=0;i<rtree_size(rtree);i++){
+            //     printf(": %s \n,",keys[i]);
+            //   }
+            //   printf("\n");
+            // }
+        //GETVALUES-----------------------------------------------
         } else if (strcmp(command, "getvalues") == 0) {
-            if (strtok(NULL, " ") != NULL){
+            if (strtok(NULL, " ") != NULL) {
                 printf("syntax: getvalues <key>\n");
                 continue;
             }
-            // printf("%s\n",key);
-            //TODO
-            else {
-              printf("Error on getvalues\n");
-            }
+
+            // else {
+            //   printf("Error on getvalues\n");
+            // }
+        
         } else {
             printf("That command doesn't exist.\n");
         }

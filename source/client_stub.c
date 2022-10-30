@@ -18,21 +18,6 @@
 /*
  *Função auxiliar
  */
-MessageT *create_message(short op, short c_tp) {
-
-    MessageT *ms = malloc(sizeof(MessageT));
-    message_t__init(ms);
-
-    ms->opcode = op;
-    ms->c_type = c_tp;
-
-  return ms;
-}
-
-
-/*
- *Função auxiliar
- */
 int any_error(short op_f) {
 
   if (op_f == MESSAGE_T__OPCODE__OP_ERROR) {
@@ -145,7 +130,10 @@ struct data_t *rtree_get(struct rtree_t *rtree, char *key) {
     // send msg and receive response
     MessageT *msg_rcv = network_send_receive(rtree, &msg);
     free(msg.key);
-    if (msg_rcv == NULL) {return NULL;}
+    if (msg_rcv == NULL) {
+        message_t__free_unpacked(msg_rcv, NULL);
+        return NULL;
+    }
     
     if (msg_rcv->opcode == MESSAGE_T__OPCODE__OP_ERROR) {
         message_t__free_unpacked(msg_rcv, NULL);
@@ -156,6 +144,7 @@ struct data_t *rtree_get(struct rtree_t *rtree, char *key) {
     struct data_t *d;
     if (msg_rcv->data.data == NULL) {
         d = NULL;
+        message_t__free_unpacked(msg_rcv, NULL);
     } else {
         d = data_create(msg_rcv->size);
         memcpy(d->data, msg_rcv->data.data, d->datasize);
@@ -172,24 +161,30 @@ struct data_t *rtree_get(struct rtree_t *rtree, char *key) {
  */
 int rtree_del(struct rtree_t *rtree, char *key){
 
+    // create message
     MessageT msg = MESSAGE_T__INIT;
     msg.opcode = MESSAGE_T__OPCODE__OP_DEL;
     msg.c_type = MESSAGE_T__C_TYPE__CT_KEY;
-
 
     msg.key = malloc(strlen(key));
     memcpy(msg.key, key, strlen(key));
     msg.size = strlen(key);
 
+    // send msg and receive response
     MessageT *msg_rcv = network_send_receive(rtree, &msg);
     free(msg.key);
 
-    if (msg_rcv == NULL) {return -1;}
-    int res = any_error(msg_rcv->opcode);
-     
+    if (msg_rcv == NULL) {
+        message_t__free_unpacked(msg_rcv, NULL);
+        return -1;
+    }
+    if (msg_rcv->opcode == MESSAGE_T__OPCODE__OP_ERROR) {
+        message_t__free_unpacked(msg_rcv, NULL);
+        return -1;
+    }
 
     message_t__free_unpacked(msg_rcv, NULL);
-    return res;
+    return 0;
  }
 
 
