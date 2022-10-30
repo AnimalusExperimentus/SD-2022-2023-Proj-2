@@ -1,3 +1,10 @@
+/*
+*   Grupo 12
+*   Duarte Lopes Pinheiro nº54475
+*   Filipe Henriques nº55228
+*   Márcio Moreira nº41972
+*/
+
 #include <sys/socket.h>
 #include <stdlib.h>
 #include <netinet/in.h>
@@ -25,8 +32,6 @@ int network_server_init(short port){
         perror("Something went wrong");
         return -1;
     }
-
-    // server = malloc(sizeof(struct sockaddr_in));
 
     server.sin_family = AF_INET;
     server.sin_addr.s_addr = htonl(INADDR_ANY);

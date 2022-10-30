@@ -1,3 +1,10 @@
+/*
+*   Grupo 12
+*   Duarte Lopes Pinheiro nº54475
+*   Filipe Henriques nº55228
+*   Márcio Moreira nº41972
+*/
+
 #include "../include/sdmessage.pb-c.h"
 #include "../include/tree.h"
 #include "../include/tree_skel.h"
@@ -72,7 +79,6 @@ int invoke(MessageT *msg) {
                 msg->opcode=MESSAGE_T__OPCODE__OP_DEL+1;
             }else {
                 msg->opcode=MESSAGE_T__OPCODE__OP_ERROR;
-                // printf("COULD NOT FIND ENTRY\n");
             }
             msg->c_type=MESSAGE_T__C_TYPE__CT_NONE;
             return 0;
@@ -87,7 +93,6 @@ int invoke(MessageT *msg) {
             free(key);
 
             if(t == NULL) {
-                // printf("COULD NOT FIND ENTRY\n");
                 msg->opcode=MESSAGE_T__OPCODE__OP_GET+1;
                 msg->c_type=MESSAGE_T__C_TYPE__CT_VALUE;
                 msg->data.data = NULL;
@@ -112,8 +117,6 @@ int invoke(MessageT *msg) {
             char* temp_key = malloc(msg->size);
             memcpy(temp_key, msg->key, msg->size);
             
-            // printf("%s\n", temp_key);
-
             int r = tree_put(tree, temp_key, new_data);
             data_destroy(new_data);
             free(temp_key);
@@ -139,7 +142,6 @@ int invoke(MessageT *msg) {
                     size++;
                 }
                 
-                // to msg
                 msg->n_keys = size;
                 msg->keys = kk;
 
@@ -182,7 +184,6 @@ int invoke(MessageT *msg) {
             } else {
                 msg->opcode=MESSAGE_T__OPCODE__OP_ERROR;
                 msg->c_type=MESSAGE_T__C_TYPE__CT_NONE;
-                printf("val is null\n");
             }
             return 0;
             

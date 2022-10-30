@@ -4,6 +4,7 @@
 *   Filipe Henriques nº55228
 *   Márcio Moreira nº41972
 */
+
 #include "../include/data.h"
 #include "../include/entry.h"
 #include <stdlib.h>

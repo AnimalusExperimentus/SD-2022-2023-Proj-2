@@ -30,11 +30,13 @@ int main(int argc, char *argv[]) {
         exit(-1);
     }
     printf("Connected to server!\n");
+    printf("> ");
 
     char line[BUFFERLEN];
     while(fgets(line, BUFFERLEN, stdin)) {
 
         char* command = strtok(line, " \n");
+        printf("\n");
         if (strcmp(command, "quit") == 0) {
             rtree_disconnect(rtree);
             break;
@@ -44,6 +46,7 @@ int main(int argc, char *argv[]) {
             char* data = strtok(NULL, "\n");
             if (key == NULL || data == NULL || strtok(NULL, " ") != NULL){
                 printf("syntax: put <key> <data>\n");
+                printf("\n> ");
                 continue;
             }
 
@@ -58,17 +61,20 @@ int main(int argc, char *argv[]) {
             } else {
                 printf("Error on put\n"); 
             }
+
         // GET -----------------------------------------------------
         } else if (strcmp(command, "get") == 0) {
             char* key = strtok(NULL, " \n");
             if (key == NULL || strtok(NULL, " ") != NULL){
                 printf("syntax: get <key>\n");
+                printf("\n> ");
                 continue;
             }
 
             struct data_t *d = rtree_get(rtree, key);
             if (d == NULL) { 
                 printf("Error in get\n");
+                printf("\n> ");
                 continue;
             }
             if (d->datasize == 0 ){
@@ -76,11 +82,13 @@ int main(int argc, char *argv[]) {
             } else {
                 printf("Value found for this key: %.*s\n", d->datasize, (char*)d->data);
             }
+
         //DEL-----------------------------------------------------
         } else if (strcmp(command, "del") == 0) {
             char* key = strtok(NULL, " \n");
             if (key == NULL || strtok(NULL, " ") != NULL){
                 printf("syntax: del <key>\n");
+                printf("\n> ");
                 continue;
             }
             
@@ -89,10 +97,12 @@ int main(int argc, char *argv[]) {
             }else {
               printf("Key not found or error on delete\n");
             }
+
         // SIZE ---------------------------------------------------
         } else if (strcmp(command, "size") == 0) {
             if (strtok(NULL, " ") != NULL){
                 printf("syntax: size\n");
+                printf("\n> ");
                 continue;
             }
 
@@ -108,6 +118,7 @@ int main(int argc, char *argv[]) {
         } else if (strcmp(command, "height") == 0) {
             if (strtok(NULL, " ") != NULL){
                 printf("syntax: height\n");
+                printf("\n> ");
                 continue;
             }
 
@@ -123,6 +134,7 @@ int main(int argc, char *argv[]) {
         } else if (strcmp(command, "getkeys") == 0) {
             if (strtok(NULL, " ") != NULL){
                 printf("syntax: getkeys \n");
+                printf("\n> ");
                 continue;
             }
 
@@ -140,6 +152,7 @@ int main(int argc, char *argv[]) {
         } else if (strcmp(command, "getvalues") == 0) {
             if (strtok(NULL, " ") != NULL) {
                 printf("syntax: getvalues <key>\n");
+                printf("\n> ");
                 continue;
             }
 
@@ -157,6 +170,7 @@ int main(int argc, char *argv[]) {
         } else {
             printf("That command doesn't exist.\n");
         }
+        printf("\n> ");
     }
     exit(0);
 }

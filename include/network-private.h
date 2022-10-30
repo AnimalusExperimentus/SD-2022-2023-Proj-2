@@ -1,4 +1,9 @@
-
+/*
+*   Grupo 12
+*   Duarte Lopes Pinheiro nº54475
+*   Filipe Henriques nº55228
+*   Márcio Moreira nº41972
+*/
 
 #ifndef _NETWORK_PRIVATE_H
 #define _NETWORK_PRIVATE_H

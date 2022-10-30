@@ -1,3 +1,10 @@
+/*
+*   Grupo 12
+*   Duarte Lopes Pinheiro nº54475
+*   Filipe Henriques nº55228
+*   Márcio Moreira nº41972
+*/
+
 #include <unistd.h>
 #include <stdio.h>
 

@@ -138,13 +138,12 @@ struct data_t *rtree_get(struct rtree_t *rtree, char *key) {
     struct data_t *d;
     if (msg_rcv->data.data == NULL) {
         d = NULL;
-        message_t__free_unpacked(msg_rcv, NULL);
     } else {
         d = data_create(msg_rcv->size);
         memcpy(d->data, msg_rcv->data.data, d->datasize);
-        message_t__free_unpacked(msg_rcv, NULL);
     }
 
+    message_t__free_unpacked(msg_rcv, NULL);
     return d;
 }
 
@@ -201,8 +200,8 @@ int rtree_size(struct rtree_t *rtree) {
     }
     
     int size = msg_rcv->size;
-    message_t__free_unpacked(msg_rcv, NULL);
 
+    message_t__free_unpacked(msg_rcv, NULL);
     return size;
 }
 
@@ -226,8 +225,8 @@ int rtree_height(struct rtree_t *rtree) {
     }
     
     int size = msg_rcv->size;
-    message_t__free_unpacked(msg_rcv, NULL);
 
+    message_t__free_unpacked(msg_rcv, NULL);
     return size;
 }
 
@@ -261,8 +260,8 @@ char **rtree_get_keys(struct rtree_t *rtree) {
         key_arr[i] = malloc(len);
         memcpy(key_arr[i], msg_rcv->keys[i], len);
     }
-    message_t__free_unpacked(msg_rcv, NULL);
     
+    message_t__free_unpacked(msg_rcv, NULL);
     return key_arr;
 }
 

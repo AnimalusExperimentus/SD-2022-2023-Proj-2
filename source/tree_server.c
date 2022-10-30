@@ -24,8 +24,6 @@ int main(int argc, char *argv[]) {
         exit(-1);
     }
 
-    // printf("port: %i\n", port);
-
     int listening_socket = network_server_init((short)port);
     if (listening_socket == -1) {
         printf("socket creation error\n");
